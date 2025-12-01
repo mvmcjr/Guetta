@@ -7,7 +7,6 @@ namespace Guetta.Commands.Extensions
         public static void AddGuettaCommands(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddCommand<PingCommand>("ping");
-            serviceCollection.AddCommand<VolumeCommand>("volume");
             serviceCollection.AddCommand<PlayChannelCommand>("play");
             serviceCollection.AddCommand<SkipChannelCommand>("skip");
             serviceCollection.AddCommand<QueueCommand>("queue");
