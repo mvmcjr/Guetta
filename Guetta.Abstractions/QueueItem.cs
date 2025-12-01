@@ -1,19 +1,18 @@
-﻿using DSharpPlus.Entities;
+﻿namespace Guetta.Abstractions;
 
-namespace Guetta.Abstractions
+public record QueueUser(ulong Id, string Username);
+
+public class QueueItem
 {
-    public class QueueItem
-    {
-        public DiscordUser User { get; init; }
+    public QueueUser User { get; init; }
 
-        public DiscordChannel TextChannel { get; init; }
+    public ulong TextChannelId { get; init; }
         
-        public DiscordChannel VoiceChannel { get; init; }
+    public ulong VoiceChannelId { get; init; }
         
-        public int CurrentQueueIndex { get; set; }
+    public int CurrentQueueIndex { get; set; }
 
-        public bool Playing { get; set; }
+    public bool Playing { get; set; }
 
-        public VideoInformation VideoInformation { get; init; }
-    }
+    public VideoInformation VideoInformation { get; init; }
 }

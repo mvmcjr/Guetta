@@ -1,26 +1,25 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity.Extensions;
+using NetCord;
+using NetCord.Rest;
 
 namespace Guetta.App.Extensions
 {
     public static class MessageExtensions
     {
-        public static async Task<bool> AskReply(this DiscordMessage message, string content, DiscordUser user, string positiveContent, DiscordEmoji positiveEmoji, string negativeContent, DiscordEmoji negativeEmoji, TimeSpan? timeoutOverride = null)
+        public static async Task<bool> AskReply(this RestMessage message, string content, User user, string positiveContent, Emoji positiveEmoji, string negativeContent, Emoji negativeEmoji, TimeSpan? timeoutOverride = null)
         {
-            var positiveButton = new DiscordButtonComponent(ButtonStyle.Success, "btn_success", positiveContent, false, new DiscordComponentEmoji(positiveEmoji));
-            var negativeButton = new DiscordButtonComponent(ButtonStyle.Secondary, "btn_negative", negativeContent, false, new DiscordComponentEmoji(negativeEmoji));
-            var discordMessage = await message.RespondAsync(b => b.WithContent(content).AddComponents(negativeButton, positiveButton));
-
-            var waitForButtonAsync = await discordMessage.WaitForButtonAsync(user, timeoutOverride);
-            await discordMessage.DeleteAsync();
-            return !waitForButtonAsync.TimedOut && waitForButtonAsync.Result.Id == "btn_success";
+            throw new NotImplementedException();
+            // var positiveButton = new DiscordButtonComponent(ButtonStyle.Success, "btn_success", positiveContent, false, new DiscordComponentEmoji(positiveEmoji));
+            // var negativeButton = new DiscordButtonComponent(ButtonStyle.Secondary, "btn_negative", negativeContent, false, new DiscordComponentEmoji(negativeEmoji));
+            // var discordMessage = await message.RespondAsync(b => b.WithContent(content).AddComponents(negativeButton, positiveButton));
+            //
+            // var waitForButtonAsync = await discordMessage.WaitForButtonAsync(user, timeoutOverride);
+            // await discordMessage.DeleteAsync();
+            // return !waitForButtonAsync.TimedOut && waitForButtonAsync.Result.Id == "btn_success";
         }
 
-        public static Task DeleteMessageAfter(this DiscordMessage message, TimeSpan timeout)
+        public static Task DeleteMessageAfter(this RestMessage message, TimeSpan timeout)
         {
             return Task.Run(async () =>
             {
@@ -30,7 +29,7 @@ namespace Guetta.App.Extensions
         }
 
 
-        public static Task DeleteMessageAfter(this Task<DiscordMessage> message, TimeSpan timeout)
+        public static Task DeleteMessageAfter(this Task<RestMessage> message, TimeSpan timeout)
         {
             return message.ContinueWith(t =>
             {

@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
-using DSharpPlus.Entities;
+using NetCord.Gateway;
 
 namespace Guetta.Abstractions
 {
     public interface IDiscordCommand
     {
-        Task ExecuteAsync(DiscordMessage message, string[] arguments);
+        Task ExecuteAsync(Message message, string[] arguments);
     }
 }

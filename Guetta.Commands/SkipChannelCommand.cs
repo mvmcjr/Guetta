@@ -1,45 +1,45 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
 using Guetta.Abstractions;
 using Guetta.App;
 using Guetta.App.Extensions;
 using Guetta.Localisation;
+using Microsoft.Extensions.Logging;
+using NetCord.Gateway;
+using NetCord.Rest;
 
 namespace Guetta.Commands
 {
-    internal class SkipChannelCommand : IDiscordCommand
+    internal class SkipChannelCommand(
+        LocalisationService localisationService,
+        GuildContextManager guildQueue,
+        ILogger<SkipChannelCommand> logger)
+        : IDiscordCommand
     {
-        public SkipChannelCommand(LocalisationService localisationService, GuildContextManager guildQueue)
+        public async Task ExecuteAsync(Message message, string[] arguments)
         {
-            LocalisationService = localisationService;
-            GuildContextManager = guildQueue;
-        }
-
-        private GuildContextManager GuildContextManager { get; }
-        
-        private LocalisationService LocalisationService { get; }
-        
-        public async Task ExecuteAsync(DiscordMessage message, string[] arguments)
-        {
-            if (!message.Channel.GuildId.HasValue)
+            if (!message.GuildId.HasValue)
             {
-                await message.Channel.SendMessageAsync("Invalid guild ID in channel");
+                if (message.Channel != null)
+                    await message.Channel.SendMessageAsync("Invalid guild ID in channel");
+                else
+                    logger.LogWarning("Message channel is null in SkipChannelCommand");
+                
                 return;
             }
 
-            var guildContext = GuildContextManager.GetOrCreate(message.Channel.GuildId.Value);
+            var guildContext = guildQueue.GetOrCreate(message.GuildId.Value);
             var queue = guildContext.GuildQueue;
-            
+
             if (!queue.CanSkip())
             {
-                await LocalisationService.SendMessageAsync(message.Channel, "CantSkip", message.Author.Mention)
+                await localisationService.SendMessageAsync(message.ChannelId, "CantSkip", message.Author.Username)
                     .DeleteMessageAfter(TimeSpan.FromSeconds(15));
                 return;
             }
-            
+
             queue.Skip();
-            await LocalisationService.SendMessageAsync(message.Channel, "SongSkipped", message.Author.Mention)
+            await localisationService.SendMessageAsync(message.ChannelId, "SongSkipped", message.Author.Username)
                 .DeleteMessageAfter(TimeSpan.FromSeconds(15));
         }
     }

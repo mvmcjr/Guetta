@@ -1,6 +1,6 @@
 ﻿using System.Threading.Channels;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
+using NetCord.Gateway;
 
 namespace Guetta.App;
 
@@ -12,7 +12,7 @@ public class GuildContext
 
     public Voice Voice { get; }
 
-    internal Channel<DiscordMessage> CommandChannel { get; } = Channel.CreateBounded<DiscordMessage>(100);
+    internal Channel<Message> CommandChannel { get; } = Channel.CreateBounded<Message>(100);
     
     internal Task CommandChannelTask { get; set; }
 
