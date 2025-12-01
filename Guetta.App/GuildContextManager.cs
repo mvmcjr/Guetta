@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Guetta.Localisation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NetCord.Gateway;
+using NetCord.Rest;
 
 namespace Guetta.App;
 
@@ -23,7 +25,9 @@ public class GuildContextManager
         ServiceProvider.GetRequiredService<YoutubeDlService>(),
         ServiceProvider.GetRequiredService<LocalisationService>(),
         guildId,
-        ServiceProvider.GetRequiredService<ILogger<Voice>>()
+        ServiceProvider.GetRequiredService<ILogger<Voice>>(),
+        ServiceProvider.GetRequiredService<GatewayClient>(),
+        ServiceProvider.GetRequiredService<RestClient>()
     );
 
     private GuildQueue BuildQueue(ulong guildId, Voice voice) => new(

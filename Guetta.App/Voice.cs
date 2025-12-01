@@ -1,136 +1,106 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using DSharpPlus.Net.WebSocket;
-using DSharpPlus.VoiceNext;
 using Guetta.Abstractions;
 using Guetta.App.Extensions;
 using Guetta.Localisation;
 using Microsoft.Extensions.Logging;
+using NetCord.Gateway;
+using NetCord.Gateway.Voice;
+using NetCord.Logging;
+using NetCord.Rest;
+using LogLevel = NetCord.Logging.LogLevel;
 
 namespace Guetta.App
 {
     internal record PlayRequest(QueueItem QueueItem, CancellationTokenSource CancellationToken);
 
-    public class Voice : IGuildItem
+    public class Voice(
+        YoutubeDlService youtubeDlService,
+        LocalisationService localisationService,
+        ulong guildId,
+        ILogger<Voice> logger,
+        GatewayClient gatewayClient,
+        RestClient restClient)
+        : IGuildItem
     {
-        public Voice(YoutubeDlService youtubeDlService, LocalisationService localisationService, ulong guildId, ILogger<Voice> logger)
-        {
-            YoutubeDlService = youtubeDlService;
-            LocalisationService = localisationService;
-            GuildId = guildId;
-            Logger = logger;
-        }
+        public ulong GuildId { get; } = guildId;
 
-        public ulong GuildId { get; }
+
+        private YoutubeDlService YoutubeDlService { get; } = youtubeDlService;
+
+        public VoiceClient? AudioClient { get; set; }
         
+        public ulong? AudioChannelId { get; set; }
 
-        private YoutubeDlService YoutubeDlService { get; }
+        private LocalisationService LocalisationService { get; } = localisationService;
 
-        public VoiceNextConnection AudioClient { get; set; }
-
-        public ulong? ChannelId => AudioClient?.TargetChannel?.Id;
-
-        public bool IsPlaying => AudioClient is { IsPlaying: true } && !AudioClient.IsDisposed();
-
-        private LocalisationService LocalisationService { get; }
-
-        private ILogger<Voice> Logger { get; }
+        private ILogger<Voice> Logger { get; } = logger;
 
         public Task ChangeVolume(double newVolume)
         {
-            if(AudioClient?.GetTransmitSink() is { } transmitSink)
-                transmitSink.VolumeModifier = newVolume;
-            
+            // if(AudioClient?.GetTransmitSink() is { } transmitSink)
+            //     transmitSink.VolumeModifier = newVolume;
+
             return Task.CompletedTask;
         }
 
-        public async Task Join(DiscordChannel voiceChannel)
+        public async Task Join(ulong guildId, ulong voiceChannel)
         {
-            if (AudioClient != null && AudioClient.TargetChannel.Id == voiceChannel.Id)
-                return;
+            AudioClient = await gatewayClient.JoinVoiceChannelAsync(
+                guildId,
+                voiceChannel,
+                new VoiceClientConfiguration
+                {
+                    Logger = new ConsoleLogger(LogLevel.Debug)
+                });
 
-            if (AudioClient != null && AudioClient.TargetChannel.Id != voiceChannel.Id)
-            {
-                await Disconnect();
-            }
-
-            var audioClient = await voiceChannel.ConnectAsync();
-            AudioClient = audioClient;
+            await AudioClient.StartAsync();
+            await AudioClient.EnterSpeakingStateAsync(new SpeakingProperties(SpeakingFlags.Microphone));
+            
+            AudioChannelId = voiceChannel;
         }
 
         public async Task Disconnect()
         {
-            if (AudioClient != null || AudioClient.IsDisposed())
+            if (AudioClient != null)
             {
-                if (AudioClient != null && !AudioClient.IsDisposed())
-                {
-                    if (AudioClient.IsPlaying)
-                    {
-                        Logger.LogInformation("Going to wait for playback to finish");
-                        
-                        var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
-                        var waitForFinishTask = AudioClient.WaitForPlaybackFinishAsync();
-                        var endedTask = await Task.WhenAny(waitForFinishTask, timeoutTask);
-
-                        if (endedTask == timeoutTask)
-                        {
-                            Logger.LogWarning("Waiting for playback to finish timed out");
-                        }
-                    }
-
-                    AudioClient.Disconnect();
-                }
-
+                await gatewayClient.UpdateVoiceStateAsync(new VoiceStateProperties(GuildId, null));
+                
+                await AudioClient.CloseAsync();
+                AudioClient.Dispose();
                 AudioClient = null;
+                
+                AudioChannelId = null;
             }
         }
 
-        public Task Play(QueueItem queueItem, CancellationTokenSource cancellationToken) => Play(new PlayRequest(queueItem, cancellationToken));
+        public Task Play(QueueItem queueItem, CancellationTokenSource cancellationToken) =>
+            Play(new PlayRequest(queueItem, cancellationToken));
 
         private async Task Play(PlayRequest playRequest)
         {
-            var currentDiscordSink = AudioClient.GetTransmitSink();
-            var webSocketClient = AudioClient.GetWebsocket();
-
-            Task WebSocketClientOnDisconnected(IWebSocketClient sender, SocketCloseEventArgs args)
-            {
-                if (args.CloseCode == 4014)
-                {
-                    playRequest.CancellationToken.Cancel();
-                }
-
-                return Task.CompletedTask;
-            }
-
-            webSocketClient.Disconnected += WebSocketClientOnDisconnected;
-
+            if(AudioClient == null)
+                throw new InvalidOperationException("Audio client is null");
+            
             try
             {
-                await playRequest.QueueItem.TextChannel.TriggerTypingAsync();
-
-                await LocalisationService.SendMessageAsync(playRequest.QueueItem.TextChannel, "SongPlaying",
-                        playRequest.QueueItem.VideoInformation.Title, playRequest.QueueItem.User.Mention)
+                await restClient.TriggerTypingStateAsync(playRequest.QueueItem.TextChannelId);
+                
+                await LocalisationService.SendMessageAsync(playRequest.QueueItem.TextChannelId, "SongPlaying",
+                        playRequest.QueueItem.VideoInformation.Title, playRequest.QueueItem.User.Username)
                     .DeleteMessageAfter(TimeSpan.FromSeconds(15));
+                
+                await using var outStream = AudioClient.CreateOutputStream();
+                await using OpusEncodeStream opusStream = new(outStream, PcmFormat.Short, VoiceChannels.Stereo, OpusApplication.Audio);
 
-                await YoutubeDlService.SendToAudioSink(playRequest.QueueItem.VideoInformation.Url, currentDiscordSink, playRequest.CancellationToken.Token);
+                await YoutubeDlService.SendToAudioSink(playRequest.QueueItem.VideoInformation.Url, opusStream,
+                    playRequest.CancellationToken.Token);
             }
             catch (Exception ex)
             {
                 if (!playRequest.CancellationToken.IsCancellationRequested)
                     Logger.LogError(ex, "Failed to play something");
-            }
-            finally
-            {
-                webSocketClient.Disconnected -= WebSocketClientOnDisconnected;
-
-                if (currentDiscordSink != null)
-                {
-                    if (!AudioClient.IsDisposed())
-                        await currentDiscordSink.FlushAsync(playRequest.CancellationToken.Token).ContinueWith(_ => { });
-                }
             }
         }
     }

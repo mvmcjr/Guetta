@@ -1,47 +1,47 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
 using Guetta.Abstractions;
 using Guetta.App;
 using Guetta.App.Extensions;
 using Guetta.Localisation;
+using Microsoft.Extensions.Logging;
+using NetCord.Gateway;
 
 namespace Guetta.Commands;
 
-public class ResetCommand : IDiscordCommand
+public class ResetCommand(GuildContextManager guildContextManager, LocalisationService localisationService, ILogger<ResetCommand> logger)
+    : IDiscordCommand
 {
-    public ResetCommand(GuildContextManager guildContextManager, LocalisationService localisationService)
-    {
-        GuildContextManager = guildContextManager;
-        LocalisationService = localisationService;
-    }
+    private GuildContextManager GuildContextManager { get; } = guildContextManager;
 
-    private GuildContextManager GuildContextManager { get; }
-    
-    private LocalisationService LocalisationService { get; }
-    
-    public async Task ExecuteAsync(DiscordMessage message, string[] arguments)
+    private LocalisationService LocalisationService { get; } = localisationService;
+
+    public async Task ExecuteAsync(Message message, string[] arguments)
     {
-        if (!message.Channel.GuildId.HasValue)
+        if (!message.GuildId.HasValue)
         {
-            await message.Channel.SendMessageAsync("Invalid guild ID in channel");
+            if (message.Channel != null)
+                await message.Channel.SendMessageAsync("Invalid guild ID in channel");
+            else
+                logger.LogWarning("Message channel is null in ResetCommand");
+                
             return;
         }
-
-        var guildContext = GuildContextManager.GetOrCreate(message.Channel.GuildId.Value);
-
+        
+        var guildContext = GuildContextManager.GetOrCreate(message.GuildId.Value);
+        
         if (guildContext.GuildQueue.Count <= 0)
         {
             await LocalisationService
-                .SendMessageAsync(message.Channel, "NoSongsInQueue")
+                .SendMessageAsync(message.ChannelId, "NoSongsInQueue")
                 .DeleteMessageAfter(TimeSpan.FromSeconds(10));
         }
         else
         {
             guildContext.GuildQueue.Clear();
-
+        
             await LocalisationService
-                .SendMessageAsync(message.Channel, "QueueCleared")
+                .SendMessageAsync(message.ChannelId, "QueueCleared")
                 .DeleteMessageAfter(TimeSpan.FromSeconds(10));
         }
     }

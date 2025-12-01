@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
 using Guetta.Abstractions;
 using Guetta.App.Extensions;
+using NetCord.Gateway;
 
 namespace Guetta.Commands
 {
     internal class PingCommand : IDiscordCommand
     {
-        public async Task ExecuteAsync(DiscordMessage message, string[] arguments)
+        public async Task ExecuteAsync(Message message, string[] arguments)
         {
-            await message.Channel.SendMessageAsync($"{message.Author.Mention} pong")
-                .DeleteMessageAfter(TimeSpan.FromSeconds(5));
+            if (message.Channel != null)
+                await message.Channel.SendMessageAsync($"{message.Author.Username} pong")
+                    .DeleteMessageAfter(TimeSpan.FromSeconds(5));
         }
     }
 }

@@ -1,11 +1,11 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CliWrap;
 using CliWrap.Buffered;
-using DSharpPlus.VoiceNext;
 using Guetta.Abstractions;
 using Guetta.App.Exceptions;
 using Guetta.App.Extensions;
@@ -104,7 +104,7 @@ namespace Guetta.App
             }
         }
 
-        public async Task SendToAudioSink(string input, VoiceTransmitSink currentDiscordStream,
+        public async Task SendToAudioSink(string input, Stream currentDiscordStream,
             CancellationToken cancellationToken)
         {
             var youtubeDlArguments = new[]
@@ -123,7 +123,7 @@ namespace Guetta.App
             Logger.LogDebug("{@Program} arguments: {@Arguments}", "yt-dlp", youtubeDlArguments);
             Logger.LogDebug("{@Program} arguments: {@Arguments}", "ffmpeg", FfmpegArguments);
 
-            var stream = new ChannelStream();
+            var stream = new BufferedPipeStream();
 
             var ffmpegCommand = Cli.Wrap("ffmpeg")
                 .WithStandardInputPipe(PipeSource.FromCommand(youtubeDlCommand))
@@ -146,6 +146,7 @@ namespace Guetta.App
             }
             finally
             {
+                await currentDiscordStream.FlushAsync(cancellationToken);
                 await stream.DisposeAsync();
             }
         }

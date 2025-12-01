@@ -2,11 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>X64;x64</Platforms>
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="DSharpPlus" Version="4.5.1" />
-        <PackageReference Include="DSharpPlus.VoiceNext" Version="4.5.1" />
+        <PackageReference Include="NetCord" Version="1.0.0-alpha.449" />
     </ItemGroup>
 
 </Project>

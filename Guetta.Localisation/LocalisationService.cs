@@ -4,16 +4,17 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
 using Guetta.Localisation.Resources;
 using Microsoft.Extensions.Options;
+using NetCord.Rest;
 
 namespace Guetta.Localisation
 {
     public class LocalisationService
     {
-        public LocalisationService(IOptions<LocalisationOptions> options)
+        public LocalisationService(IOptions<LocalisationOptions> options, RestClient restClient)
         {
+            RestClient = restClient;
             Language.Culture = new CultureInfo(options.Value.Language);
             
             Items = typeof(Language)
@@ -25,6 +26,8 @@ namespace Guetta.Localisation
         }
 
         private Dictionary<string, string> Items { get; }
+        
+        private RestClient RestClient { get; }
 
         public string GetMessageTemplate(string code)
         {
@@ -38,16 +41,22 @@ namespace Guetta.Localisation
             return messageTemplate;
         }
         
-        public Task<DiscordMessage> ReplyMessageAsync(DiscordMessage message, string code,
+        public Task<RestMessage> ReplyMessageAsync(RestMessage message, string code,
             params object[] parameters)
         {
-            return message.RespondAsync(string.Format(GetMessageTemplate(code), parameters));
+            return message.ReplyAsync(string.Format(GetMessageTemplate(code), parameters));
         }
         
-        public Task<DiscordMessage> SendMessageAsync(DiscordChannel channel, string code,
+        public Task<RestMessage> SendMessageAsync(ulong channelId, string code,
             params object[] parameters)
         {
-            return channel.SendMessageAsync(string.Format(GetMessageTemplate(code), parameters));
+            return RestClient.SendMessageAsync(channelId, string.Format(GetMessageTemplate(code), parameters));
+        }
+        
+        public Task<RestMessage> SendMessageAsync(RestMessage channel, string code,
+            params object[] parameters)
+        {
+            return channel.SendAsync(string.Format(GetMessageTemplate(code), parameters));
         }
     }
 }

@@ -78,8 +78,9 @@ namespace Guetta.App
                         queueItem.CurrentQueueIndex = 0;
                         ReOrderQueue();
 
-                        Logger.LogInformation("Playing {@Title} requested by {@User}", queueItem.VideoInformation.Title, queueItem.User.Username);
-                        await Voice.Join(queueItem.VoiceChannel);
+                        Logger.LogInformation("Playing {@Title} requested by {@User}", queueItem.VideoInformation.Title,
+                            queueItem.User.Username);
+                        await Voice.Join(GuildId, queueItem.VoiceChannelId);
 
                         CancellationTokenSource?.Dispose();
                         CancellationTokenSource = new CancellationTokenSource();
@@ -88,7 +89,8 @@ namespace Guetta.App
 
                         try
                         {
-                            Logger.LogInformation("Goind to play song {@Url} queued by {@Requester}", queueItem.VideoInformation.Url, queueItem.User.Username);
+                            Logger.LogInformation("Goind to play song {@Url} queued by {@Requester}",
+                                queueItem.VideoInformation.Url, queueItem.User.Username);
                             await Voice.Play(queueItem, CancellationTokenSource);
                         }
                         catch (Exception ex)
@@ -110,7 +112,7 @@ namespace Guetta.App
                             if (!t.IsCompletedSuccessfully)
                                 Logger.LogError(t.Exception, "Failed to disconnect from voice");
                         });
-                    
+
                     Logger.LogInformation("Queue has ended");
                 }, QueueCancellationTokenSource.Token)
                 .ContinueWith(t =>

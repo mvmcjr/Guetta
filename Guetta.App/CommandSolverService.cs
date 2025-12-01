@@ -2,19 +2,17 @@
 using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
 using Guetta.Abstractions;
 using Guetta.Localisation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NetCord.Gateway;
 
 namespace Guetta.App
 {
     public class CommandSolverService
     {
         private ILogger<CommandSolverService> Logger { get; }
-
-        private Channel<DiscordMessage> ExecutionChannel { get; } = Channel.CreateBounded<DiscordMessage>(100);
 
         public CommandSolverService(IServiceProvider provider, ILogger<CommandSolverService> logger, IOptions<CommandOptions> options, LocalisationService localisationService, GuildContextManager guildContextManager)
         {
@@ -33,7 +31,7 @@ namespace Guetta.App
         
         private GuildContextManager GuildContextManager { get; }
 
-        private Task CreateCommandQueueTask(ChannelReader<DiscordMessage> reader)
+        private Task CreateCommandQueueTask(ChannelReader<Message> reader)
         {
             return Task.Run(async () =>
             {
@@ -57,12 +55,12 @@ namespace Guetta.App
             });
         }
 
-        public async ValueTask AddMessageToQueue(DiscordMessage message)
+        public async ValueTask AddMessageToQueue(Message message)
         {
-            if (!message.Channel.GuildId.HasValue)
+            if (!message.GuildId.HasValue)
                 return;
             
-            var guildContext = GuildContextManager.GetOrCreate(message.Channel.GuildId.Value);
+            var guildContext = GuildContextManager.GetOrCreate(message.GuildId.Value);
             guildContext.CommandChannelTask ??= CreateCommandQueueTask(guildContext.CommandChannel);
             
             await guildContext.CommandChannel.Writer.WriteAsync(message);

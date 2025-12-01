@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
 using Guetta.Abstractions;
 using Guetta.App;
-using Guetta.App.Extensions;
+using NetCord.Gateway;
+using NetCord.Rest;
 
 namespace Guetta.Commands
 {
@@ -16,23 +16,25 @@ namespace Guetta.Commands
 
         private GuildContextManager GuildContextManager { get; }
         
-        public async Task ExecuteAsync(DiscordMessage message, string[] arguments)
+        public async Task ExecuteAsync(Message message, string[] arguments)
         {
-            if (!message.Channel.GuildId.HasValue)
-            {
-                await message.Channel.SendMessageAsync("Invalid guild ID in channel");
-                return;
-            }
-
-            var guildContext = GuildContextManager.GetOrCreate(message.Channel.GuildId.Value);
-            var voice = guildContext.Voice;
+            throw new NotImplementedException();
             
-            if (int.TryParse(arguments[0], out var volume) && voice != null)
-            {
-                await message.Channel.TriggerTypingAsync();
-                await voice.ChangeVolume(volume / 100f);
-                await message.Channel.SendMessageAsync("Volume alterado queridão").DeleteMessageAfter(TimeSpan.FromSeconds(5));
-            }
+            // if (!message.Channel.GuildId.HasValue)
+            // {
+            //     await message.Channel.SendMessageAsync("Invalid guild ID in channel");
+            //     return;
+            // }
+            //
+            // var guildContext = GuildContextManager.GetOrCreate(message.Channel.GuildId.Value);
+            // var voice = guildContext.Voice;
+            //
+            // if (int.TryParse(arguments[0], out var volume) && voice != null)
+            // {
+            //     await message.Channel.TriggerTypingAsync();
+            //     await voice.ChangeVolume(volume / 100f);
+            //     await message.Channel.SendMessageAsync("Volume alterado queridão").DeleteMessageAfter(TimeSpan.FromSeconds(5));
+            // }
         }
     }
 }
