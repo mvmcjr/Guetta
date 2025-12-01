@@ -4,8 +4,6 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <Configurations>Debug;Release</Configurations>
-        <Platforms>x64</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,7 +12,6 @@
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0"/>
         <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0"/>
         <PackageReference Include="NetCord.Hosting.Services" Version="1.0.0-alpha.449"/>
-        <PackageReference Include="OpusDotNet" Version="1.0.3" />
     </ItemGroup>
 
     <ItemGroup>
