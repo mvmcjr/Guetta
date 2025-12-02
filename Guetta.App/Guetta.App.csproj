@@ -16,7 +16,7 @@
         <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
         <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
-        <PackageReference Include="NetCord.Hosting" Version="1.0.0-alpha.449" />
+        <PackageReference Include="NetCord.Hosting" Version="1.0.0-alpha.450" />
         <PackageReference Include="TomLonghurst.EnumerableAsyncProcessor" Version="1.1.0" />
     </ItemGroup>
 
