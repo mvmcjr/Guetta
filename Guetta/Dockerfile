@@ -1,4 +1,4 @@
-﻿FROM alpine:3.21 AS ffmpeg-base
+﻿FROM alpine:3.22 AS ffmpeg-base
 RUN apk update && apk add wget
 RUN wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
 RUN mkdir /ffmpeg
