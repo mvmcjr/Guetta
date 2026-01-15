@@ -12,11 +12,11 @@
     <ItemGroup>
         <PackageReference Include="CliWrap" Version="3.10.0" />
         <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.1" />
-        <PackageReference Include="NetCord.Hosting" Version="1.0.0-alpha.452" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />
+        <PackageReference Include="NetCord.Hosting" Version="1.0.0-alpha.455" />
         <PackageReference Include="TomLonghurst.EnumerableAsyncProcessor" Version="1.1.0" />
     </ItemGroup>
 
