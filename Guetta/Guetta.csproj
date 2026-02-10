@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Guetta.Commands\Guetta.Commands.csproj"/>
+        <ProjectReference Include="..\Guetta.Natives\Guetta.Natives.csproj"/>
     </ItemGroup>
 
 </Project>

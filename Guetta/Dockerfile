@@ -11,12 +11,17 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG TARGETARCH
 WORKDIR /src
 COPY . .
+
+# Fetch libdave native binaries
+RUN apt-get update && apt-get install -y unzip && apt-get clean
+RUN bash Guetta.Natives/fetch-natives.sh
+
 WORKDIR "/src/Guetta"
 RUN dotnet publish "Guetta.csproj" -c Release -o /app/publish -a $TARGETARCH
 
 FROM base AS final
 
-RUN apt-get update && apt-get install libopus0 libopus-dev libsodium23 libsodium-dev python3 curl -y && apt-get clean && apt-get autoremove -y
+RUN apt-get update && apt-get install python3 curl -y && apt-get clean && apt-get autoremove -y
 
 WORKDIR /app
 COPY --from=build /app/publish .
