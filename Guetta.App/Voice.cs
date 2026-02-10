@@ -91,7 +91,7 @@ namespace Guetta.App
                         playRequest.QueueItem.VideoInformation.Title, playRequest.QueueItem.User.Username)
                     .DeleteMessageAfter(TimeSpan.FromSeconds(15));
                 
-                await using var outStream = AudioClient.CreateOutputStream();
+                await using var outStream = AudioClient.CreateVoiceStream();
                 await using OpusEncodeStream opusStream = new(outStream, PcmFormat.Short, VoiceChannels.Stereo, OpusApplication.Audio);
 
                 await YoutubeDlService.SendToAudioSink(playRequest.QueueItem.VideoInformation.Url, opusStream,
