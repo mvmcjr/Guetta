@@ -11,7 +11,7 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.3" />
         <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
-        <PackageReference Include="NetCord.Hosting.Services" Version="1.0.0-alpha.461"/>
+        <PackageReference Include="NetCord.Hosting.Services" Version="1.0.0-alpha.468"/>
     </ItemGroup>
 
     <ItemGroup>
