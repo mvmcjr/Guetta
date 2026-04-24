@@ -5,8 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="OpusSharp.Natives" Version="1.6.0.1" />
-        <PackageReference Include="libsodium" Version="1.0.21" />
+        <PackageReference Include="OpusSharp.Natives" Version="1.6.1.1" />
+        <PackageReference Include="libsodium" Version="1.0.22" />
     </ItemGroup>
 
     <!-- Include libdave native binaries downloaded by the fetch script -->
