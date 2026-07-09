@@ -15,7 +15,7 @@ public class BufferedPipeStream : Stream
     // --- State ---
     private readonly Channel<byte[]> _channel;
     private readonly TaskCompletionSource<bool> _preBufferSignal = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private long _totalBytesWritten = 0;
+    private long _totalBytesWritten;
     
     // Internal read state
     private byte[]? _currentChunk;

@@ -42,7 +42,7 @@
         <value>Botando {0}, a pedido do {1}</value>
     </data>
     <data name="SongSkipped" xml:space="preserve">
-        <value>Pulando musica</value>
+        <value>Pulando musica {0}</value>
     </data>
     <data name="QueueItem" xml:space="preserve">
         <value>[{0}] {1} (Pedido por: {2})</value>

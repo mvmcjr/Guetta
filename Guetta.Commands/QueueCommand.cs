@@ -8,7 +8,6 @@ using Guetta.App.Extensions;
 using Guetta.Localisation;
 using Microsoft.Extensions.Logging;
 using NetCord.Gateway;
-using NetCord.Rest;
 
 namespace Guetta.Commands
 {

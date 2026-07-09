@@ -85,7 +85,7 @@ namespace Guetta.App
             
             try
             {
-                await restClient.TriggerTypingStateAsync(playRequest.QueueItem.TextChannelId);
+                await restClient.TriggerTypingAsync(playRequest.QueueItem.TextChannelId);
                 
                 await LocalisationService.SendMessageAsync(playRequest.QueueItem.TextChannelId, "SongPlaying",
                         playRequest.QueueItem.VideoInformation.Title, playRequest.QueueItem.User.Username)

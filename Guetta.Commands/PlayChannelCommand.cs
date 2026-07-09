@@ -6,7 +6,6 @@ using Guetta.App;
 using Guetta.App.Extensions;
 using Guetta.Localisation;
 using NetCord.Gateway;
-using NetCord.JsonModels;
 using NetCord.Rest;
 
 namespace Guetta.Commands
@@ -50,7 +49,7 @@ namespace Guetta.Commands
                 return;
             }
 
-            await restClient.TriggerTypingStateAsync(message.Channel.Id);
+            await restClient.TriggerTypingAsync(message.Channel.Id);
             var url = arguments.Aggregate((x, y) => $"{x} {y}");
 
             var playlistInformation = await videoInformationService.GetVideoInformation(url);
