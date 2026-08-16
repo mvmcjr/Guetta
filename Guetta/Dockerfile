@@ -1,4 +1,4 @@
-﻿FROM --platform=$BUILDPLATFORM alpine:3.23 AS ffmpeg-base
+﻿FROM --platform=$BUILDPLATFORM alpine:3.24 AS ffmpeg-base
 ARG TARGETARCH
 RUN apk update && apk add --no-cache curl tar xz
 RUN set -eu; \
