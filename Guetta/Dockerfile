@@ -1,8 +1,16 @@
-﻿FROM alpine:3.23 AS ffmpeg-base
-RUN apk update && apk add wget
-RUN wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
-RUN mkdir /ffmpeg
-RUN tar -C /ffmpeg -xvf ffmpeg-release-amd64-static.tar.xz --strip-components=1
+﻿FROM --platform=$BUILDPLATFORM alpine:3.23 AS ffmpeg-base
+ARG TARGETARCH
+RUN apk update && apk add --no-cache curl tar xz
+RUN set -eu; \
+    case "$TARGETARCH" in \
+      amd64) FFMPEG_ARCH=linux64 ;; \
+      arm64) FFMPEG_ARCH=linuxarm64 ;; \
+      *) echo "Unsupported arch: $TARGETARCH" >&2; exit 1 ;; \
+    esac; \
+    curl -fL -o /tmp/ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-${FFMPEG_ARCH}-gpl.tar.xz"; \
+    mkdir -p /ffmpeg-extract /ffmpeg; \
+    tar -C /ffmpeg-extract -xf /tmp/ffmpeg.tar.xz; \
+    mv /ffmpeg-extract/*/bin/ffmpeg /ffmpeg-extract/*/bin/ffprobe /ffmpeg/
 
 FROM mcr.microsoft.com/dotnet/runtime:10.0 AS base
 WORKDIR /app
@@ -30,5 +38,5 @@ RUN chmod a+rx /usr/local/bin/yt-dlp
 
 COPY --from=ffmpeg-base /ffmpeg/ffmpeg /usr/local/bin/
 COPY --from=ffmpeg-base /ffmpeg/ffprobe /usr/local/bin/
-RUN chmod a+rx /usr/local/bin/ffmpeg
+RUN chmod a+rx /usr/local/bin/ffmpeg /usr/local/bin/ffprobe
 ENTRYPOINT ["dotnet", "Guetta.dll"]
